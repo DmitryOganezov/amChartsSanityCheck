@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>amcharts 5 standalone test</title>
+
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+    <!-- <script src="https://cdn.amcharts.com/lib/5/themes/Responsive.js"></script> -->
+    <!-- <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script> -->
+
+    <style>
+        .chart {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            overflow: hidden;
+            background-color: white;
+            border: 1px dotted #aaaaaa;
+        }
+    </style>
+
+</head>
+
+<body translate="no">
+
+    <h2>Donut chart standalone check</h2>
+    <div id="chartElementId" class="chart"></div>
+
+    <script>
+
+        am5.ready(function () { makeTestPercentChart('chartElementId'); });
+
+        // fallback wrapper; not in use
+        function drawTestPercentChart(divId, n = 0) {
+
+            console.log("drawTestPercentChart() D attempt: " + n);
+
+            try {
+                makeTestPercentChart(divId);
+            } catch (e) {
+                console.log("drawTestPercentChart() catch: " + n + "--" + e);
+                if (n > 3) {
+                    const status = "ERROR: drawTestPercentChart - failed to draw chart";
+                    console.log(status);
+                    reportError(status, divId);
+                    return;
+                }
+                n += 1;
+                console.log("drawTestPercentChart() setting timeout.... " + n);
+                setTimeout(function () { drawTestPercentChart(divId, n) }, 100);
+            }
+        }
+
+        // here's where we actually draw simple percent (pie) chart
+        function makeTestPercentChart(elementId) {
+
+            const testDataSet = [
+                { category: "Oranges", value: 300 },
+                { category: "Apples", value: 300 },
+                { category: "Nuts", value: 300 }
+            ];
+
+            // in some cases chart root is created, but chart failed
+            // here we dispose previously created root
+            maybeDisposeRoot(elementId);
+
+            // Create root element
+            var root = am5.Root.new(elementId);
+
+            // Set themes
+            root.setThemes(/*am5themes_Animated.new(root)*/);
+
+            // Create chart
+            var chart = am5percent.PieChart.new(root, {});
+
+            // Create series
+            var series = am5percent.PieSeries.new(root, {
+                valueField: "value",
+                categoryField: "category"
+            });
+
+            root.container.children.push(chart);
+            chart.series.push(series);
+            series.data.setAll(testDataSet);
+        }
+
+        // to isolate multiple roots issue
+        function maybeDisposeRoot(divId) {
+            am5.array.each(am5.registry.rootElements, function (root) {
+                if (root.dom.id == divId) {
+                    root.dispose();
+                }
+            });
+        };
+
+    </script>
+
+</body>
+
+</html>
